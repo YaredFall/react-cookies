@@ -1,0 +1,65 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+
+        // Environment setup & latest features
+        "lib": ["ESNext"],
+        "target": "ESNext",
+        "module": "Preserve",
+        "moduleDetection": "force",
+        "moduleResolution": "bundler",
+        "jsx": "react-jsx",
+
+        "strict": true,
+        "alwaysStrict": true,
+        "allowJs": false,
+
+        // no need for checking libs
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+
+        // important for Linux
+        "forceConsistentCasingInFileNames": true,
+
+        "strictFunctionTypes": true,
+        "strictBuiltinIteratorReturn": true,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+
+        // linting
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitOverride": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "useUnknownInCatchVariables": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+
+        // This doesn't seem actually useful
+        //"exactOptionalPropertyTypes": true,
+        // biome recommends against.
+        //"noPropertyAccessFromIndexSignature": false,
+        // causes problems by hoisting json files, and src to the root of the dist folder
+        //"resolveJsonModule": false,
+
+        // modules
+        "verbatimModuleSyntax": false,
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true,
+
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+
+        "incremental": true,
+        "tsBuildInfoFile": "./dist/.tsbuildinfo",
+
+        // composite project settings
+        "composite": true
+    }
+}

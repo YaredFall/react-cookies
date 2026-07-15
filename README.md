@@ -1,0 +1,1 @@
+# @yaredfall/react-cookies
