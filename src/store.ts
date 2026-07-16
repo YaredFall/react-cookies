@@ -118,7 +118,7 @@ class CookieStore {
         this.notify();
     };
 
-    deleteCookie = (cookie: string | Pick<SetCookie, "name" | "domain" | "path">): void => {
+    deleteCookie = (cookie: string | Omit<SetCookie, "value" | "maxAge" | "expires">): void => {
         const target = typeof cookie === "string" ? { name: cookie } : cookie;
         document.cookie = stringifySetCookie({
             ...this.defaults,
