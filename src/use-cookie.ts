@@ -5,6 +5,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { useCookieStore } from "./use-context";
 
 export type UseCookieOptions = Omit<SetCookie, "name" | "value"> & {
+    default?: string;
     decode?: ParseOptions["decode"];
     encode?: StringifyOptions["encode"];
 };
@@ -12,8 +13,8 @@ export type UseCookieOptions = Omit<SetCookie, "name" | "value"> & {
 export function useCookie(name: string, options: UseCookieOptions = {}) {
     const store = useCookieStore();
 
-    const getSnapshot = useCallback(() => store.getCookie(name, options.decode), [store, name, options.decode]);
-    const getServerSnapshot = useCallback(() => undefined, []);
+    const getSnapshot = () => store.getCookie(name, options.decode) ?? options.default;
+    const getServerSnapshot = () => options.default;
 
     const value = useSyncExternalStore(store.subscribe, getSnapshot, getServerSnapshot);
 
