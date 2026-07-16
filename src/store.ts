@@ -8,6 +8,8 @@ type DefaultCookieOptions = Partial<Omit<SetCookie, "name" | "value">>;
 type CookieStoreConfig = DefaultCookieOptions & {
     /** Polling interval to pick up external cookie changes @default 1000 */
     pollingInterval?: number;
+    decode?: ParseOptions["decode"];
+    encode?: StringifyOptions["encode"];
 };
 
 const DEFAULT_CONFIG: CookieStoreConfig = {
@@ -19,6 +21,8 @@ class CookieStore {
     private listeners = new Set<Listener>();
 
     private defaults: DefaultCookieOptions;
+    private decode: CookieStoreConfig["decode"];
+    private encode: CookieStoreConfig["encode"];
 
     private cache?: string;
 
@@ -28,10 +32,12 @@ class CookieStore {
     private isAutoupdating: boolean = false;
 
     constructor(config: CookieStoreConfig = {}) {
-        const { pollingInterval, ...defaults } = { ...DEFAULT_CONFIG, ...config };
+        const { pollingInterval, encode, decode, ...defaults } = { ...DEFAULT_CONFIG, ...config };
 
         this.defaults = defaults;
         this.pollingInterval = pollingInterval;
+        this.decode = decode;
+        this.encode = encode;
     }
 
     private notify() {
@@ -97,13 +103,13 @@ class CookieStore {
         };
     };
 
-    getCookie = (name: string, decode?: ParseOptions["decode"]): string | undefined => {
+    getCookie = (name: string, decode = this.decode): string | undefined => {
         this.cache ??= document.cookie;
 
         return parseCookie(this.cache, { decode })[name];
     };
 
-    setCookie = (cookie: SetCookie, encode?: StringifyOptions["encode"]): void => {
+    setCookie = (cookie: SetCookie, encode = this.encode): void => {
         this.cache ??= document.cookie;
 
         document.cookie = stringifySetCookie({ ...this.defaults, ...cookie }, { encode });
