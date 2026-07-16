@@ -1,13 +1,13 @@
 "use client";
 
-import type { ParseOptions, SetCookie, StringifyOptions } from "cookie";
 import { useCallback, useSyncExternalStore } from "react";
+import type { CookieDecoder, CookieEncoder, CookieOptions } from "./store";
 import { useCookieStore } from "./use-context";
 
-export type UseCookieOptions = Omit<SetCookie, "name" | "value"> & {
+export type UseCookieOptions = CookieOptions & {
     default?: string;
-    decode?: ParseOptions["decode"];
-    encode?: StringifyOptions["encode"];
+    decode?: CookieDecoder;
+    encode?: CookieEncoder;
 };
 
 export function useCookie(name: string, options: UseCookieOptions = {}) {
@@ -19,14 +19,11 @@ export function useCookie(name: string, options: UseCookieOptions = {}) {
     const value = useSyncExternalStore(store.subscribe, getSnapshot, getServerSnapshot);
 
     const set = useCallback(
-        (value: string) => store.setCookie({ name, value, ...options }, options.encode),
+        (value: string) => store.setCookie(name, value, options, options.encode),
         [store, name, options],
     );
 
-    const remove = useCallback(
-        (options?: Pick<SetCookie, "domain" | "path">) => store.deleteCookie({ name, ...options }),
-        [store, name],
-    );
+    const remove = useCallback(() => store.deleteCookie(name, options), [store, name, options]);
 
     return [value, set, remove] as const;
 }

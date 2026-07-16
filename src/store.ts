@@ -3,13 +3,17 @@ import { type ParseOptions, parseCookie, type SetCookie, type StringifyOptions, 
 
 type Listener = () => void;
 
-type DefaultCookieOptions = Partial<Omit<SetCookie, "name" | "value">>;
+type CookieDecoder = ParseOptions["decode"];
+type CookieEncoder = StringifyOptions["encode"];
 
-type CookieStoreConfig = DefaultCookieOptions & {
+type CookieOptions = Omit<SetCookie, "name" | "value">;
+type DeleteCookieOptions = Omit<CookieOptions, "maxAge" | "expires">;
+
+type CookieStoreConfig = CookieOptions & {
     /** Polling interval to pick up external cookie changes @default 1000 */
     pollingInterval?: number;
-    decode?: ParseOptions["decode"];
-    encode?: StringifyOptions["encode"];
+    decode?: CookieDecoder;
+    encode?: CookieEncoder;
 };
 
 const DEFAULT_CONFIG: CookieStoreConfig = {
@@ -20,9 +24,9 @@ const DEFAULT_CONFIG: CookieStoreConfig = {
 class CookieStore {
     private listeners = new Set<Listener>();
 
-    private defaults: DefaultCookieOptions;
-    private decode: CookieStoreConfig["decode"];
-    private encode: CookieStoreConfig["encode"];
+    private defaults: CookieOptions;
+    private decode: CookieDecoder;
+    private encode: CookieEncoder;
 
     private cache?: string;
 
@@ -109,22 +113,23 @@ class CookieStore {
         return parseCookie(this.cache, { decode })[name];
     };
 
-    setCookie = (cookie: SetCookie, encode = this.encode): void => {
+    setCookie = (name: string, value: string, options: CookieOptions = {}, encode = this.encode): void => {
         this.cache ??= document.cookie;
 
-        document.cookie = stringifySetCookie({ ...this.defaults, ...cookie }, { encode });
+        document.cookie = stringifySetCookie({ ...this.defaults, ...options, name, value }, { encode });
 
         this.cache = document.cookie;
         this.notify();
     };
 
-    deleteCookie = (cookie: string | Omit<SetCookie, "value" | "maxAge" | "expires">): void => {
-        const target = typeof cookie === "string" ? { name: cookie } : cookie;
+    deleteCookie = (name: string, options: DeleteCookieOptions = {}): void => {
         document.cookie = stringifySetCookie({
             ...this.defaults,
-            ...target,
+            ...options,
+            name,
             value: "",
             maxAge: -1,
+            expires: undefined,
         });
 
         this.cache = document.cookie;
@@ -132,5 +137,5 @@ class CookieStore {
     };
 }
 
-export type { CookieStoreConfig, DefaultCookieOptions };
+export type { CookieDecoder, CookieEncoder, CookieOptions, CookieStoreConfig, DeleteCookieOptions };
 export { CookieStore };
