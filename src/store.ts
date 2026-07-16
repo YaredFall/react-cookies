@@ -6,11 +6,12 @@ type Listener = () => void;
 type DefaultCookieOptions = Partial<Omit<SetCookie, "name" | "value">>;
 
 type CookieStoreConfig = DefaultCookieOptions & {
-    /** Enable polling to pick up external cookie changes */
-    polling?: number;
+    /** Polling interval to pick up external cookie changes @default 1000 */
+    pollingInterval?: number;
 };
 
 const DEFAULT_CONFIG: CookieStoreConfig = {
+    pollingInterval: 1000,
     path: "/",
 };
 
@@ -18,23 +19,24 @@ class CookieStore {
     private listeners = new Set<Listener>();
 
     private defaults: DefaultCookieOptions;
-    private polling?: number;
 
     private cache?: string;
-    private pollTimer?: ReturnType<typeof setInterval>;
+
+    private pollingInterval?: number;
+    private poller?: ReturnType<typeof setInterval>;
+
+    private isAutoupdating: boolean = false;
 
     constructor(config: CookieStoreConfig = {}) {
-        const { polling, ...defaults } = { ...DEFAULT_CONFIG, ...config };
+        const { pollingInterval, ...defaults } = { ...DEFAULT_CONFIG, ...config };
 
         this.defaults = defaults;
-        this.polling = polling;
+        this.pollingInterval = pollingInterval;
     }
 
     private notify() {
         this.listeners.forEach((l) => void l());
     }
-
-    private handleFocus = () => this.sync();
 
     private sync() {
         if (this.cache === document.cookie) return;
@@ -43,34 +45,55 @@ class CookieStore {
         this.notify();
     }
 
-    private createPollingInterval() {
-        if (this.polling) {
-            window.addEventListener("focus", this.handleFocus);
-
-            return setInterval(() => this.sync(), this.polling);
+    private setPoller() {
+        if (this.pollingInterval) {
+            this.poller ??= setInterval(() => this.sync(), this.pollingInterval);
         }
-        return undefined;
     }
-    private cleanupPolling() {
-        if (this.pollTimer) {
-            clearInterval(this.pollTimer);
-            window.removeEventListener("focus", this.handleFocus);
-            this.pollTimer = undefined;
+    private clearPoller() {
+        if (this.poller) {
+            clearInterval(this.poller);
+            this.poller = undefined;
         }
+    }
+
+    private startAutoupdate() {
+        if (this.isAutoupdating) return;
+
+        this.isAutoupdating = true;
+
+        const autoupdate = () => {
+            const visible = document.visibilityState === "visible";
+
+            if (visible) {
+                this.sync();
+                this.setPoller();
+            } else {
+                this.clearPoller();
+            }
+        };
+
+        autoupdate();
+        document.addEventListener("visibilitychange", autoupdate);
+
+        return () => {
+            this.isAutoupdating = false;
+
+            this.clearPoller();
+            document.removeEventListener("visibilitychange", autoupdate);
+        };
     }
 
     subscribe = (listener: Listener) => {
         this.listeners.add(listener);
 
-        this.cache ??= document.cookie;
-        this.pollTimer ??= this.createPollingInterval();
+        this.sync();
+        const stopAutoupdate = this.startAutoupdate();
 
         return () => {
             this.listeners.delete(listener);
 
-            if (this.listeners.size === 0) {
-                this.cleanupPolling();
-            }
+            if (this.listeners.size === 0) stopAutoupdate?.();
         };
     };
 
