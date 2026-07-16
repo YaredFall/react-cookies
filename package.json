@@ -21,6 +21,7 @@
     "scripts": {
         "test": "vitest",
         "build": "tsdown",
+        "dev": "pnpm --filter playground dev",
         "release": "pnpm build && bumpp && pnpm publish --access public"
     },
     "author": "",
