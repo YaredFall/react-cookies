@@ -7,7 +7,10 @@ type Listener = () => void;
 type SetCookieOptions = Omit<SetCookie, "name" | "value" | "httpOnly">;
 type DeleteCookieOptions = Omit<SetCookieOptions, "maxAge" | "expires">;
 
+type CookieString = string | null | undefined;
+
 type CookieStoreConfig = SetCookieOptions & {
+    initialCookieString?: CookieString;
     /** Polling interval to pick up external cookie changes @default 1000 */
     pollingInterval?: number;
     stringify?: StringifyCookieValue;
@@ -21,7 +24,7 @@ class CookieStore {
     private stringify: StringifyCookieValue;
     private parse: ParseCookieValue;
 
-    private cache?: string;
+    private cookieString?: CookieString;
 
     private pollingInterval?: number;
     private poller?: ReturnType<typeof setInterval>;
@@ -29,12 +32,14 @@ class CookieStore {
     private isAutoupdating: boolean = false;
 
     constructor({
+        initialCookieString,
         pollingInterval = 1000,
         stringify = defaultStringify,
         parse = defaultParse,
         ...defaults
     }: CookieStoreConfig = {}) {
         this.defaults = defaults;
+        this.cookieString = initialCookieString;
         this.pollingInterval = pollingInterval;
         this.stringify = stringify;
         this.parse = parse;
@@ -45,9 +50,9 @@ class CookieStore {
     }
 
     private sync() {
-        if (this.cache === document.cookie) return;
+        if (this.cookieString === document.cookie) return;
 
-        this.cache = document.cookie;
+        this.cookieString = document.cookie;
         this.notify();
     }
 
@@ -104,9 +109,7 @@ class CookieStore {
     };
 
     getCookie = <T = unknown>(name: string, parse = this.parse as ParseCookieValue<T>): T => {
-        this.cache ??= document.cookie;
-
-        return parse(parseCookie(this.cache)[name]);
+        return parse(parseCookie(this.cookieString ?? "")[name]);
     };
 
     setCookie = <T>(
@@ -115,9 +118,12 @@ class CookieStore {
         options: SetCookieOptions = {},
         stringify = this.stringify as StringifyCookieValue<T>,
     ): void => {
-        this.cache ??= document.cookie;
-
-        document.cookie = stringifySetCookie({ ...this.defaults, ...options, name, value: stringify(value) });
+        document.cookie = stringifySetCookie({
+            ...this.defaults,
+            ...options,
+            name,
+            value: stringify(value),
+        });
 
         this.cache = document.cookie;
         this.notify();

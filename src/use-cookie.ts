@@ -18,9 +18,8 @@ export function useCookie<T = unknown>(name: string, options: UseCookieOptions<T
     const store = useCookieStore();
 
     const getSnapshot = () => store.getCookie(name, options.parse) ?? options.default;
-    const getServerSnapshot = () => options.default;
 
-    const value = useSyncExternalStore(store.subscribe, getSnapshot, getServerSnapshot);
+    const value = useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 
     const set = useCallback(
         (value: T) => store.setCookie(name, value, options, options.stringify),
