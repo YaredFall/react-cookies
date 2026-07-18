@@ -1,25 +1,29 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import type { CookieDecoder, CookieEncoder, CookieOptions } from "./store";
+import type { ParseCookieValue, StringifyCookieValue } from "./parsing";
+import type { CookieOptions } from "./store";
 import { useCookieStore } from "./use-context";
 
-export type UseCookieOptions = CookieOptions & {
-    default?: string;
-    decode?: CookieDecoder;
-    encode?: CookieEncoder;
+export type UseCookieOptions<T = unknown> = CookieOptions & {
+    /** The default value to return if the cookie is not found */
+    default?: T;
+    /**  The function to parse the cookie value */
+    parse?: ParseCookieValue<T>;
+    /**  The function to stringify the cookie value */
+    stringify?: StringifyCookieValue<T>;
 };
 
-export function useCookie(name: string, options: UseCookieOptions = {}) {
+export function useCookie<T = unknown>(name: string, options: UseCookieOptions<T> = {}) {
     const store = useCookieStore();
 
-    const getSnapshot = () => store.getCookie(name, options.decode) ?? options.default;
+    const getSnapshot = () => store.getCookie(name, options.parse) ?? options.default;
     const getServerSnapshot = () => options.default;
 
     const value = useSyncExternalStore(store.subscribe, getSnapshot, getServerSnapshot);
 
     const set = useCallback(
-        (value: string) => store.setCookie(name, value, options, options.encode),
+        (value: T) => store.setCookie(name, value, options, options.stringify),
         [store, name, options],
     );
 

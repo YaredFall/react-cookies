@@ -1,10 +1,8 @@
 /** biome-ignore-all lint/suspicious/noDocumentCookie: <CookieStore api is too new to be used in production> */
-import { type ParseOptions, parseCookie, type SetCookie, type StringifyOptions, stringifySetCookie } from "cookie";
+import { parseCookie, type SetCookie, stringifySetCookie } from "cookie";
+import { defaultParse, defaultStringify, type ParseCookieValue, type StringifyCookieValue } from "./parsing";
 
 type Listener = () => void;
-
-type CookieDecoder = ParseOptions["decode"];
-type CookieEncoder = StringifyOptions["encode"];
 
 type CookieOptions = Omit<SetCookie, "name" | "value">;
 type DeleteCookieOptions = Omit<CookieOptions, "maxAge" | "expires">;
@@ -12,21 +10,16 @@ type DeleteCookieOptions = Omit<CookieOptions, "maxAge" | "expires">;
 type CookieStoreConfig = CookieOptions & {
     /** Polling interval to pick up external cookie changes @default 1000 */
     pollingInterval?: number;
-    decode?: CookieDecoder;
-    encode?: CookieEncoder;
-};
-
-const DEFAULT_CONFIG: CookieStoreConfig = {
-    pollingInterval: 1000,
-    path: "/",
+    stringify?: StringifyCookieValue;
+    parse?: ParseCookieValue;
 };
 
 class CookieStore {
     private listeners = new Set<Listener>();
 
     private defaults: CookieOptions;
-    private decode: CookieDecoder;
-    private encode: CookieEncoder;
+    private stringify: StringifyCookieValue;
+    private parse: ParseCookieValue;
 
     private cache?: string;
 
@@ -35,13 +28,17 @@ class CookieStore {
 
     private isAutoupdating: boolean = false;
 
-    constructor(config: CookieStoreConfig = {}) {
-        const { pollingInterval, encode, decode, ...defaults } = { ...DEFAULT_CONFIG, ...config };
-
+    constructor({
+        pollingInterval = 1000,
+        path = "/",
+        stringify = defaultStringify,
+        parse = defaultParse,
+        ...defaults
+    }: CookieStoreConfig = {}) {
         this.defaults = defaults;
         this.pollingInterval = pollingInterval;
-        this.decode = decode;
-        this.encode = encode;
+        this.stringify = stringify;
+        this.parse = parse;
     }
 
     private notify() {
@@ -107,16 +104,21 @@ class CookieStore {
         };
     };
 
-    getCookie = (name: string, decode = this.decode): string | undefined => {
+    getCookie = <T = unknown>(name: string, parse = this.parse as ParseCookieValue<T>): T => {
         this.cache ??= document.cookie;
 
-        return parseCookie(this.cache, { decode })[name];
+        return parse(parseCookie(this.cache)[name]);
     };
 
-    setCookie = (name: string, value: string, options: CookieOptions = {}, encode = this.encode): void => {
+    setCookie = <T>(
+        name: string,
+        value: T,
+        options: CookieOptions = {},
+        stringify = this.stringify as StringifyCookieValue<T>,
+    ): void => {
         this.cache ??= document.cookie;
 
-        document.cookie = stringifySetCookie({ ...this.defaults, ...options, name, value }, { encode });
+        document.cookie = stringifySetCookie({ ...this.defaults, ...options, name, value: stringify(value) });
 
         this.cache = document.cookie;
         this.notify();
@@ -137,5 +139,5 @@ class CookieStore {
     };
 }
 
-export type { CookieDecoder, CookieEncoder, CookieOptions, CookieStoreConfig, DeleteCookieOptions };
+export type { CookieOptions, CookieStoreConfig, DeleteCookieOptions };
 export { CookieStore };
