@@ -4,10 +4,10 @@ import { defaultParse, defaultStringify, type ParseCookieValue, type StringifyCo
 
 type Listener = () => void;
 
-type CookieOptions = Omit<SetCookie, "name" | "value">;
-type DeleteCookieOptions = Omit<CookieOptions, "maxAge" | "expires">;
+type SetCookieOptions = Omit<SetCookie, "name" | "value">;
+type DeleteCookieOptions = Omit<SetCookieOptions, "maxAge" | "expires">;
 
-type CookieStoreConfig = CookieOptions & {
+type CookieStoreConfig = SetCookieOptions & {
     /** Polling interval to pick up external cookie changes @default 1000 */
     pollingInterval?: number;
     stringify?: StringifyCookieValue;
@@ -17,7 +17,7 @@ type CookieStoreConfig = CookieOptions & {
 class CookieStore {
     private listeners = new Set<Listener>();
 
-    private defaults: CookieOptions;
+    private defaults: SetCookieOptions;
     private stringify: StringifyCookieValue;
     private parse: ParseCookieValue;
 
@@ -113,7 +113,7 @@ class CookieStore {
     setCookie = <T>(
         name: string,
         value: T,
-        options: CookieOptions = {},
+        options: SetCookieOptions = {},
         stringify = this.stringify as StringifyCookieValue<T>,
     ): void => {
         this.cache ??= document.cookie;
@@ -139,5 +139,5 @@ class CookieStore {
     };
 }
 
-export type { CookieOptions, CookieStoreConfig, DeleteCookieOptions };
+export type { CookieStoreConfig, DeleteCookieOptions, SetCookieOptions };
 export { CookieStore };

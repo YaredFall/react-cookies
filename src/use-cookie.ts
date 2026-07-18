@@ -2,10 +2,10 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import type { ParseCookieValue, StringifyCookieValue } from "./parsing";
-import type { CookieOptions } from "./store";
+import type { SetCookieOptions } from "./store";
 import { useCookieStore } from "./use-context";
 
-export type UseCookieOptions<T = unknown> = CookieOptions & {
+export type UseCookieOptions<T = unknown> = SetCookieOptions & {
     /** The default value to return if the cookie is not found */
     default?: T;
     /**  The function to parse the cookie value */
