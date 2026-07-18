@@ -4,7 +4,7 @@ import { defaultParse, defaultStringify, type ParseCookieValue, type StringifyCo
 
 type Listener = () => void;
 
-type SetCookieOptions = Omit<SetCookie, "name" | "value">;
+type SetCookieOptions = Omit<SetCookie, "name" | "value" | "httpOnly">;
 type DeleteCookieOptions = Omit<SetCookieOptions, "maxAge" | "expires">;
 
 type CookieStoreConfig = SetCookieOptions & {
