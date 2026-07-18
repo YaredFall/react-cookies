@@ -37,7 +37,8 @@
         "vitest": "^4.1.6"
     },
     "dependencies": {
-        "cookie": "^2.0.1"
+        "cookie": "^2.0.1",
+        "destr": "^2.0.5"
     },
     "peerDependencies": {
         "react": ">=18"

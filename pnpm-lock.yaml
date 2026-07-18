@@ -11,6 +11,9 @@ importers:
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
+      destr:
+        specifier: ^2.0.5
+        version: 2.0.5
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.4
@@ -23,7 +26,7 @@ importers:
         version: 11.1.0
       react:
         specifier: '>=18'
-        version: 19.2.7
+        version: 19.2.4
       tsdown:
         specifier: ^0.22.0
         version: 0.22.8(typescript@6.0.3)
@@ -769,6 +772,9 @@ packages:
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
+  destr@2.0.5:
+    resolution: {integrity: sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==}
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -969,10 +975,6 @@ packages:
 
   react@19.2.4:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
-    engines: {node: '>=0.10.0'}
-
-  react@19.2.7:
-    resolution: {integrity: sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==}
     engines: {node: '>=0.10.0'}
 
   resolve-pkg-maps@1.0.0:
@@ -1745,6 +1747,8 @@ snapshots:
 
   defu@6.1.7: {}
 
+  destr@2.0.5: {}
+
   detect-libc@2.1.2: {}
 
   dts-resolver@3.0.0: {}
@@ -1895,8 +1899,6 @@ snapshots:
       scheduler: 0.27.0
 
   react@19.2.4: {}
-
-  react@19.2.7: {}
 
   resolve-pkg-maps@1.0.0: {}
 
