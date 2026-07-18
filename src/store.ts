@@ -30,7 +30,6 @@ class CookieStore {
 
     constructor({
         pollingInterval = 1000,
-        path = "/",
         stringify = defaultStringify,
         parse = defaultParse,
         ...defaults
