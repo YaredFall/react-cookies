@@ -125,8 +125,7 @@ class CookieStore {
             value: stringify(value),
         });
 
-        this.cache = document.cookie;
-        this.notify();
+        this.sync();
     };
 
     deleteCookie = (name: string, options: DeleteCookieOptions = {}): void => {
@@ -139,8 +138,7 @@ class CookieStore {
             expires: undefined,
         });
 
-        this.cache = document.cookie;
-        this.notify();
+        this.sync();
     };
 }
 
