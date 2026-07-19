@@ -25,6 +25,7 @@ class CookieStore {
     private parse: ParseCookieValue;
 
     private cookieString?: CookieString;
+    private cache: Record<string, unknown> = {};
 
     private pollingInterval?: number;
     private poller?: ReturnType<typeof setInterval>;
@@ -53,6 +54,7 @@ class CookieStore {
         if (this.cookieString === document.cookie) return;
 
         this.cookieString = document.cookie;
+        this.cache = {};
         this.notify();
     }
 
@@ -109,7 +111,12 @@ class CookieStore {
     };
 
     getCookie = <T = unknown>(name: string, parse = this.parse as ParseCookieValue<T>): T => {
-        return parse(parseCookie(this.cookieString ?? "")[name]);
+        if (this.cache[name] !== undefined) return this.cache[name] as T;
+
+        const value = parse(parseCookie(this.cookieString ?? "")[name]);
+        this.cache[name] = value;
+
+        return value;
     };
 
     setCookie = <T>(
