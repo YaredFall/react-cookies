@@ -16,7 +16,7 @@ export function CookieDemo() {
 
 function Consumer() {
     const [value, setValue] = useState("");
-    const [cookie, setCookie, removeCookie] = useCookie("test", { maxAge: 5 });
+    const [cookie, setCookie, removeCookie] = useCookie<string>("test", "default value", { maxAge: 10 });
 
     return (
         <div className="space-y-3">
