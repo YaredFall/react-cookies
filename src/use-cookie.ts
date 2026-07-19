@@ -12,6 +12,14 @@ export type UseCookieOptions<T = unknown> = SetCookieOptions & {
     stringify?: StringifyCookieValue<T>;
 };
 
+export type UseCookieReturn<T> = [T, (value: T) => void, () => void];
+
+// biome-ignore format: more readable
+export function useCookie<T>(name: string, defaultValue?: undefined, options?: UseCookieOptions<T>): UseCookieReturn<T | undefined>;
+// biome-ignore format: more readable
+export function useCookie<T>(name: string, defaultValue: undefined, options?: UseCookieOptions<T> ): UseCookieReturn<unknown>;
+// biome-ignore format: more readable
+export function useCookie<T>(name: string, defaultValue?: T, options?: UseCookieOptions<T>): UseCookieReturn<T>;
 export function useCookie<T>(name: string, defaultValue?: T, options?: UseCookieOptions<T>) {
     const store = useCookieStore();
 
